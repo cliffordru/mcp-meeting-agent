@@ -50,3 +50,36 @@ async def get_trending_repos() -> str:
         return """• langchain-ai/langchain - Building applications with LLMs through composability
 • openai/openai-python - The official Python library for the OpenAI API
 • microsoft/vscode - Visual Studio Code is a code editor redefined and optimized for building and debugging modern web and cloud applications"""
+
+
+# Example of how to use MCP context for LLM-generated fallbacks (for production)
+async def get_tech_trivia_with_llm_fallback(ctx=None) -> str:
+    """
+    Get tech trivia with LLM-generated fallback content.
+    This demonstrates how to use MCP context for dynamic content generation.
+    """
+    try:
+        service = TechTriviaService()
+        trivia = await service.get_tech_trivia()
+        return f"Question: {trivia.question}\nAnswer: {trivia.correct_answer}"
+    except Exception as e:
+        logger.error("Error getting tech trivia", error=str(e))
+        
+        # If we have MCP context, use LLM to generate contextual fallback
+        if ctx:
+            try:
+                # Use MCP context to sample from LLM for dynamic fallback
+                response = await ctx.sample(
+                    model="gpt-4o-mini",
+                    messages=[{
+                        "role": "user",
+                        "content": "Generate a technology trivia question and answer that would be engaging for a software development team meeting. Make it relevant to current tech trends."
+                    }],
+                    max_tokens=150
+                )
+                return response.content
+            except Exception as llm_error:
+                logger.error("Error generating LLM fallback", error=str(llm_error))
+        
+        # Fallback to hardcoded content if LLM generation fails
+        return "Question: What programming language was created by Guido van Rossum?\nAnswer: Python"

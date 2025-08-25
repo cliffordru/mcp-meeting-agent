@@ -17,6 +17,7 @@ A meeting preparation agent that provides trivia, fun facts, and GitHub trending
 - **Robust Error Handling**: Graceful fallbacks and comprehensive error recovery
 - **Structured Logging**: Comprehensive logging with configurable levels
 - **Comprehensive Testing**: Full test coverage for all components
+- **FastMCP Integration**: Production-ready MCP server with error masking, rate limiting, and context-aware logging
 
 ## Architecture
 
@@ -89,6 +90,11 @@ GITHUB_TRENDING_URL=https://api.ossinsight.io/v1/trends/repos/
 
 # Logging
 LOG_LEVEL=INFO
+
+# FastMCP Configuration
+MCP_MASK_ERROR_DETAILS=true
+MCP_RATE_LIMIT=50/hour
+MCP_ENABLE_LOGGING=true
 ```
 
 ## Testing
@@ -117,14 +123,14 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### Security Considerations
 
-**Current State**: No security measures implemented
+**Current State**: Basic FastMCP error masking and rate limiting implemented
 **Production Needs**:
 - **Authentication**: OAuth 2.0 flow with proper session management
 - **Input Validation**: Content filtering and sanitization for all inputs
 - **Output Filtering**: LLM output validation to prevent prompt injection
 - **SAST/DAST**: Static and dynamic application security testing
 - **SCA**: Software composition analysis for dependency vulnerabilities
-- **Rate Limiting**: API rate limiting and abuse prevention
+- **Enhanced Rate Limiting**: More sophisticated rate limiting and abuse prevention
 - **Secrets Management**: TBD when needed
 
 ### Performance & Scalability
@@ -161,9 +167,11 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 - **Analytics**: Meeting effectiveness tracking and insights
 
 ### Monitoring & Alerting
-**Current State**: Basic structured logging
+**Current State**: Basic structured logging with FastMCP client logging integration
 **Production Needs**:
 - **Observability & Alerting**: Enhanced monitoring for agent performance and tool usage
+- **Centralized Logging**: Log aggregation and analysis
+- **Performance Metrics**: Response time tracking and alerting
 
 ## Project Structure
 
