@@ -1,4 +1,5 @@
 # server.py
+import asyncio
 from fastmcp import FastMCP
 from src.app.agents.meeting_planner_agent import MeetingPlannerAgent
 from src.app.core.config import settings
@@ -26,13 +27,43 @@ def prepare_meeting_prompt() -> str:
 @mcp.tool
 async def prepare_meeting() -> str:
     """Prepares a meeting for the user."""
-    logger.info("Meeting preparation requested")
+    start_time = asyncio.get_event_loop().time()
+    
     try:
-        result = await planner_agent.plan_meeting()
-        logger.info("Meeting preparation completed successfully")
+        logger.info(
+            "Meeting preparation requested",
+            timeout_seconds=settings.MCP_TOOL_TIMEOUT
+        )
+        
+        # Add timeout to the entire tool execution
+        result = await asyncio.wait_for(
+            planner_agent.plan_meeting(),
+            timeout=settings.MCP_TOOL_TIMEOUT
+        )
+        
+        execution_time = asyncio.get_event_loop().time() - start_time
+        logger.info(
+            "Meeting preparation completed successfully",
+            execution_time_seconds=round(execution_time, 2)
+        )
         return result
+        
+    except asyncio.TimeoutError:
+        execution_time = asyncio.get_event_loop().time() - start_time
+        logger.error(
+            "Meeting preparation timed out",
+            timeout_seconds=settings.MCP_TOOL_TIMEOUT,
+            execution_time_seconds=round(execution_time, 2)
+        )
+        return "Meeting preparation timed out. Please try again."
+        
     except Exception as e:
-        logger.error("Error in meeting preparation", error=str(e))
+        execution_time = asyncio.get_event_loop().time() - start_time
+        logger.error(
+            "Error in meeting preparation", 
+            error=str(e),
+            execution_time_seconds=round(execution_time, 2)
+        )
         return f"Error preparing meeting: {str(e)}"
 
 if __name__ == "__main__":
