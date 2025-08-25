@@ -12,7 +12,7 @@ from src.app.core.logging_config import get_logger
 logger = get_logger(__name__)
 
 # Initialize the meeting planner agent
-planner_agent = MeetingPlannerAgent(use_enhanced_tools=settings.USE_ENHANCED_TOOLS)
+planner_agent = MeetingPlannerAgent()
 
 # Initialize FastMCP server
 mcp = FastMCP(
@@ -24,14 +24,13 @@ logger.info("MCP server initialized with LangChain-based planner agent")
 
 
 @mcp.tool
-async def prepare_meeting(ctx: Context, meeting_context: str = "", use_enhanced: bool = None) -> str:
+async def prepare_meeting(ctx: Context, meeting_context: str = "") -> str:
     """
     Prepare comprehensive meeting notes with trivia, fun facts, and trending repositories.
     
     Args:
         ctx: MCP context for logging and LLM sampling
         meeting_context: Description of the meeting (type, audience, topic, etc.)
-        use_enhanced: Whether to use agent tools (default: from config)
     
     Returns:
         Formatted meeting notes ready for the host
@@ -43,7 +42,7 @@ async def prepare_meeting(ctx: Context, meeting_context: str = "", use_enhanced:
         
         # Add timeout to the tool execution
         result = await asyncio.wait_for(
-            planner_agent.plan_meeting(meeting_context, use_enhanced),
+            planner_agent.plan_meeting(meeting_context),
             timeout=settings.MCP_TOOL_TIMEOUT
         )
         
@@ -51,8 +50,7 @@ async def prepare_meeting(ctx: Context, meeting_context: str = "", use_enhanced:
         logger.info(
             "Successfully prepared meeting notes",
             execution_time_seconds=round(execution_time, 2),
-            context=meeting_context,
-            enhanced_tools=use_enhanced if use_enhanced is not None else settings.USE_ENHANCED_TOOLS
+            context=meeting_context
         )
         
         return result

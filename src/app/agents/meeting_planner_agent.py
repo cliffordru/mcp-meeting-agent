@@ -1,12 +1,11 @@
 """
-LangChain-based meeting planner agent that can use both basic tools and agent tools.
-This agent provides intelligent orchestration with context-aware enhancement capabilities.
+LangChain-based meeting planner agent that uses agent tools for intelligent orchestration.
+This agent provides context-aware improvement capabilities.
 """
 import asyncio
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 
-from ..tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
-from ..tools.agent_tools import enhanced_tech_trivia_agent, enhanced_fun_facts_agent, enhanced_github_trending_agent
+from ..tools.agent_tools import tech_trivia_agent, fun_facts_agent, github_trending_agent
 from ..core.llm_gateway import LLMGateway
 from ..core.logging_config import get_logger
 from ..core.config import settings
@@ -18,25 +17,18 @@ logger = get_logger(__name__)
 
 class MeetingPlannerAgent:
     """
-    LangChain-based agent for planning meetings using both basic tools and agent tools.
-    This agent can choose between basic tools (fast, reliable) and agent tools (intelligent, contextual).
+    LangChain-based agent for planning meetings using agent tools.
+    This agent provides intelligent orchestration with context-aware improvement capabilities.
     """
     
-    def __init__(self, use_enhanced_tools: bool = True):
+    def __init__(self):
         self.llm_gateway = LLMGateway()
-        self.use_enhanced_tools = use_enhanced_tools
-        
-        # Choose tools based on configuration
-        if use_enhanced_tools:
-            self.tools = [
-                enhanced_tech_trivia_agent,
-                enhanced_fun_facts_agent, 
-                enhanced_github_trending_agent
-            ]
-            logger.info("Using agent tools for intelligent meeting preparation")
-        else:
-            self.tools = [get_tech_trivia, get_fun_fact, get_trending_repos]
-            logger.info("Using basic tools for reliable meeting preparation")
+        self.tools = [
+            tech_trivia_agent,
+            fun_facts_agent, 
+            github_trending_agent
+        ]
+        logger.info("Using agent tools for intelligent meeting preparation")
         
         # Create the agent using centralized prompt - provider agnostic
         self.agent = create_tool_calling_agent(
@@ -72,33 +64,27 @@ class MeetingPlannerAgent:
         
         return execution_time_rounded
     
-    async def plan_meeting(self, meeting_context: str = "", use_enhanced: bool = None) -> str:
+    async def plan_meeting(self, meeting_context: str = "") -> str:
         """
         Plan a meeting using the LangChain agent framework.
         
         Args:
             meeting_context: Context about the meeting (type, audience, etc.)
-            use_enhanced: Override the default enhanced tools setting
         """
         start_time = asyncio.get_event_loop().time()
-        
-        # Override enhanced tools setting if specified
-        if use_enhanced is not None:
-            self.use_enhanced_tools = use_enhanced
         
         try:
             logger.info(
                 "Starting LangChain-based meeting planning", 
                 context=meeting_context,
-                enhanced_tools=self.use_enhanced_tools,
                 timeout_seconds=settings.AGENT_EXECUTOR_TIMEOUT
             )
             
-            # Prepare input with context for enhanced tools
-            if self.use_enhanced_tools and meeting_context:
+            # Prepare input with context for agent tools
+            if meeting_context:
                 input_text = f"Prepare meeting notes for: {meeting_context}. Use the agent tools to make content more relevant and engaging."
             else:
-                input_text = f"Prepare meeting notes for: {meeting_context or 'a general tech meeting'}"
+                input_text = f"Prepare meeting notes for: a general tech meeting"
             
             # Add timeout to the agent execution
             result = await asyncio.wait_for(
@@ -109,15 +95,14 @@ class MeetingPlannerAgent:
                 timeout=settings.AGENT_EXECUTOR_TIMEOUT
             )
             
-            self._log_execution_time(start_time, True, enhanced_tools=self.use_enhanced_tools)
+            self._log_execution_time(start_time, True)
             return result["output"]
             
         except asyncio.TimeoutError:
             self._log_execution_time(
                 start_time, False,
                 timeout_seconds=settings.AGENT_EXECUTOR_TIMEOUT,
-                context=meeting_context,
-                enhanced_tools=self.use_enhanced_tools
+                context=meeting_context
             )
             return await self._fallback_plan_meeting()
             
@@ -125,8 +110,7 @@ class MeetingPlannerAgent:
             self._log_execution_time(
                 start_time, False,
                 error=str(e),
-                context=meeting_context,
-                enhanced_tools=self.use_enhanced_tools
+                context=meeting_context
             )
             return await self._fallback_plan_meeting()
     

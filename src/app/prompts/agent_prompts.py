@@ -24,7 +24,7 @@ If any tool fails, use the fallback content provided and continue with the meeti
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
-# Enhancement prompts for agent tools
+# Improvement prompts for agent tools
 TECH_TRIVIA_ENHANCEMENT_PROMPT = """You are an expert at making tech trivia engaging and relevant for meetings.
 
 Original trivia:
@@ -39,9 +39,9 @@ Please enhance this trivia to make it more engaging and relevant for this specif
 3. How to make the answer more educational or thought-provoking
 4. Adding a brief explanation or fun fact about the answer
 
-Return the enhanced trivia in this format:
-Question: [enhanced question]
-Answer: [enhanced answer]
+Return the improved trivia in this format:
+Question: [improved question]
+Answer: [improved answer]
 [optional: brief explanation or connection to meeting context]"""
 
 FUN_FACT_ENHANCEMENT_PROMPT = """You are an expert at making fun facts engaging and relevant for meetings.
@@ -56,7 +56,7 @@ Please enhance this fun fact to make it more engaging and relevant for this spec
 3. Adding a brief explanation or connection to work/tech
 4. Making it more memorable or conversation-starting
 
-Return the enhanced fun fact with any relevant connections to the meeting context."""
+Return the improved fun fact with any relevant connections to the meeting context."""
 
 TRENDING_ENHANCEMENT_PROMPT = """You are an expert at curating and presenting trending GitHub repositories for meetings.
 

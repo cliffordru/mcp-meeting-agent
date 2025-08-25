@@ -52,10 +52,7 @@ class Settings(BaseSettings):
     LANGFUSE_HOST: Optional[str] = None
 
     # FastMCP Configuration
-    MCP_MASK_ERROR_DETAILS: bool = True  # Hide internal errors from clients
-    MCP_ENABLE_LOGGING: bool = True      # Enable MCP client logging
-    
-    # Agent Configuration
-    USE_ENHANCED_TOOLS: bool = True  # Whether to use agent tools vs basic tools
+    MCP_MASK_ERROR_DETAILS: bool = True
+    MCP_ENABLE_LOGGING: bool = True
 
 settings = Settings()
