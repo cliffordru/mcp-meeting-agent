@@ -61,6 +61,30 @@ class TestMCPServerIntegration:
             assert "Unable to prepare meeting information" in result
 
     @pytest.mark.asyncio
+    async def test_prepare_meeting_with_partial_api_failures(self):
+        """Test that meeting notes are generated even when some APIs fail."""
+        from server import planner_agent
+        
+        # Mock individual services to simulate partial failures
+        with patch('app.services.tech_trivia_service.TechTriviaService.get_tech_trivia') as mock_trivia, \
+             patch('app.services.fun_facts_service.FunFactsService.get_fun_fact') as mock_facts, \
+             patch('app.services.github_trending_service.GitHubTrendingService.get_trending_repos') as mock_repos:
+            
+            # Make trivia fail, but facts and repos succeed
+            mock_trivia.side_effect = Exception("API Error")
+            mock_facts.return_value = type('obj', (object,), {'text': 'Test fun fact'})()
+            mock_repos.return_value = [{'name': 'test/repo', 'description': 'Test repo', 'language': 'Python', 'stars': 100, 'url': 'https://github.com/test/repo'}]
+            
+            # Call the agent directly
+            result = await planner_agent.plan_meeting()
+            
+            # Verify that meeting notes are still generated
+            assert "Meeting Notes" in result
+            assert "Fun Fact" in result
+            assert "Trending" in result or "GitHub" in result
+            assert len(result) > 100  # Should be substantial content
+
+    @pytest.mark.asyncio
     async def test_mcp_server_initialization(self):
         """Test that the MCP server is properly initialized."""
         from server import mcp, planner_agent

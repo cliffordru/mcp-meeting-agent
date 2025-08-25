@@ -20,7 +20,8 @@ async def get_tech_trivia() -> str:
         return f"Question: {trivia.question}\nAnswer: {trivia.correct_answer}"
     except Exception as e:
         logger.error("Error getting tech trivia", error=str(e))
-        return "Unable to fetch tech trivia at this time."
+        # Provide a fallback trivia question
+        return "Question: What programming language was created by Guido van Rossum?\nAnswer: Python"
 
 
 @tool
@@ -32,7 +33,8 @@ async def get_fun_fact() -> str:
         return fact.text
     except Exception as e:
         logger.error("Error getting fun fact", error=str(e))
-        return "Unable to fetch fun fact at this time."
+        # Provide a fallback fun fact
+        return "Did you know? The average person spends 6 months of their life waiting for red lights."
 
 
 @tool
@@ -44,4 +46,7 @@ async def get_trending_repos() -> str:
         return RepositoryFormatter.format_trending_repos_for_llm(repos)
     except Exception as e:
         logger.error("Error getting trending repos", error=str(e))
-        return "Unable to fetch trending repositories at this time."
+        # Provide fallback trending repos
+        return """• langchain-ai/langchain - Building applications with LLMs through composability
+• openai/openai-python - The official Python library for the OpenAI API
+• microsoft/vscode - Visual Studio Code is a code editor redefined and optimized for building and debugging modern web and cloud applications"""

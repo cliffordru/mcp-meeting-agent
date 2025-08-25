@@ -42,6 +42,7 @@ class TechTriviaService:
 
                     # Return the first question from the results
                     if validated_response.results:
+                        logger.info("Successfully fetched tech trivia from API")
                         return validated_response.results[0]
                     raise ValueError("No trivia questions found in response")
 
@@ -53,26 +54,27 @@ class TechTriviaService:
                     "Error fetching tech trivia",
                     error=str(e),
                     status_code=e.status,
-                    exc_info=True
+                    url=self.api_url
                 )
-                raise ValueError(f"Could not retrieve valid tech trivia data: {str(e)}") from e
+                return self._get_fallback_trivia()
             except (aiohttp.ClientError, ValidationError) as e:
                 logger.error(
                     "Error fetching or validating tech trivia",
                     error=str(e),
-                    exc_info=True
+                    url=self.api_url
                 )
-                raise ValueError(f"Could not retrieve valid tech trivia data: {str(e)}") from e
+                return self._get_fallback_trivia()
             except Exception as e:
                 logger.error(
                     "Unexpected error while fetching tech trivia",
                     error=str(e),
-                    exc_info=True
+                    url=self.api_url
                 )
-                raise ValueError(f"An error occurred while fetching tech trivia: {str(e)}") from e
+                return self._get_fallback_trivia()
 
     def _get_fallback_trivia(self) -> TechTriviaQuestion:
         """Returns a fallback trivia question when the API is unavailable."""
+        logger.info("Using fallback tech trivia question")
         return TechTriviaQuestion(
             category="Science: Computers",
             type="multiple",
