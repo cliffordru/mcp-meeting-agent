@@ -2,7 +2,7 @@
 LangChain-based meeting planner agent that coordinates tools for meeting preparation.
 """
 import asyncio
-from langchain.agents import AgentExecutor, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
 from ..tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
@@ -22,8 +22,8 @@ class MeetingPlannerAgent:
         self.llm_gateway = LLMGateway()
         self.tools = [get_tech_trivia, get_fun_fact, get_trending_repos]
         
-        # Create the agent using centralized prompt
-        self.agent = create_openai_tools_agent(
+        # Create the agent using centralized prompt - provider agnostic
+        self.agent = create_tool_calling_agent(
             llm=self.llm_gateway.chat_model,
             tools=self.tools,
             prompt=MEETING_PLANNER_PROMPT

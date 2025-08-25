@@ -25,6 +25,16 @@ dev = [
     "pytest-cov>=6.0.0",
     "pytest-asyncio>=0.24.0",
 ]
+anthropic = [
+    "langchain-anthropic>=0.2.0",
+]
+google = [
+    "langchain-google-genai>=2.1.0",
+]
+all = [
+    "langchain-anthropic>=0.2.0",
+    "langchain-google-genai>=2.1.0",
+]
 
 [tool.uv]
 dev-dependencies = [

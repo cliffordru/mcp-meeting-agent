@@ -21,7 +21,18 @@ A meeting preparation agent that provides trivia, fun facts, and GitHub trending
 
 ## Architecture
 
-The project follows a modern LangChain agent architecture with clean separation of concerns:
+The project follows a modern LangChain agent architecture with clean separation of concerns and **provider-agnostic LLM support**:
+
+### Provider-Agnostic Design
+
+The application is designed to work with multiple LLM providers without code changes:
+
+- **OpenAI/OpenRouter**: Use any OpenAI-compatible API via `base_url` configuration
+- **Anthropic Claude**: Direct support for Claude models (requires `langchain-anthropic`)
+- **Google Gemini**: Direct support for Gemini models (requires `langchain-google-genai`)
+- **Other Providers**: Any OpenAI-compatible API via `base_url` configuration
+
+The system automatically detects the provider based on the model name and configuration, making it easy to switch between providers by simply updating your `.env` file.
 
 - **LangChain Agents**: Intelligent orchestrators that coordinate tools using LLM reasoning
 - **Tools**: Reusable LangChain tools that wrap external services and APIs
@@ -51,6 +62,18 @@ The project follows a modern LangChain agent architecture with clean separation 
    ```bash
    uv sync
    ```
+   
+   **Optional**: Install additional LLM provider support:
+   ```bash
+   # For Anthropic Claude support
+   uv add langchain-anthropic
+   
+   # For Google Gemini support  
+   uv add langchain-google-genai
+   
+   # Or install all providers
+   uv add langchain-anthropic langchain-google-genai
+   ```
 
 3. **Set up environment variables**:
    ```bash
@@ -76,12 +99,17 @@ The project follows a modern LangChain agent architecture with clean separation 
 Key configuration options in `.env`:
 
 ```env
-# LLM Configuration
+# LLM Configuration (Provider Agnostic)
 LLM_API_KEY=your_api_key
-LLM_API_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
+LLM_API_BASE_URL=https://api.openai.com/v1  # Optional: for OpenAI/OpenRouter
+LLM_MODEL=gpt-4o-mini  # Supports OpenAI, Anthropic Claude, Google Gemini
 LLM_TEMPERATURE=0.0
-LLM_REQUEST_TIMEOUT=15
+LLM_REQUEST_TIMEOUT=60
+
+# Provider Examples:
+# OpenAI/OpenRouter: LLM_MODEL=gpt-4o-mini, LLM_API_BASE_URL=https://api.openai.com/v1
+# Anthropic Claude: LLM_MODEL=claude-3-5-sonnet-20241022 (no base_url needed)
+# Google Gemini: LLM_MODEL=gemini-1.5-flash (no base_url needed)
 
 # API Configuration
 TECH_TRIVIA_API_URL=https://opentdb.com/api.php?amount=1&category=18&type=multiple
@@ -142,11 +170,12 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### AI Architecture Improvements
 
-**Current State**: LangChain agent framework with tool-based architecture and LLM-generated fallback content for API failures
+**Current State**: LangChain agent framework with tool-based architecture, LLM-generated fallback content for API failures, and provider-agnostic LLM support
 **Production Needs**:
 - **Model-as-a-Service**: Right-sized models for cost/latency/accuracy balance
 - **Prompt Engineering**: Systematic prompt optimization and versioning
 - **Agent Optimization**: Fine-tune agent prompts and tool selection logic
+- **Multi-Provider Support**: Enhanced provider switching and fallback mechanisms
 - **Tool Validation**: Enhanced input/output validation for tools
 - **Enhanced LLM-Generated Fallbacks**: Improve dynamic LLM-generated content when APIs fail
   - Generate contextual trivia questions based on meeting type/context
