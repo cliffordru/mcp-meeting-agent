@@ -52,7 +52,7 @@ The project follows a clean architecture with separation of concerns:
    ```
 
 5. **Configure MCP Client**:
-   To use this MCP server with your MCP host client, see [`mcp-server-config.json`](mcp-server-config.json) in the project root for the complete configuration example.
+   To use this MCP server with your MCP host client, see [`mcp-client-config.json`](mcp-client-config.json) in the project root for the complete configuration example.
 
    The server runs on `http://127.0.0.1:8000/sse` by default and provides the `prepare_meeting()` tool for generating meeting content.
 
