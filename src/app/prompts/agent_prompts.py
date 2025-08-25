@@ -33,15 +33,15 @@ Answer: {answer}
 
 Meeting context: {meeting_context}
 
-Please improve this trivia to make it more engaging and relevant for this specific meeting. Consider:
+Please enhance this trivia to make it more engaging and relevant for this specific meeting. Consider:
 1. How to frame the question to be more interesting
 2. How to connect it to the meeting context or industry
 3. How to make the answer more educational or thought-provoking
 4. Adding a brief explanation or fun fact about the answer
 
-Return the improved trivia in this format:
-Question: [improved question]
-Answer: [improved answer]
+Return the enhance trivia in this format:
+Question: [enhance question]
+Answer: [enhance answer]
 [optional: brief explanation or connection to meeting context]"""
 
 FUN_FACT_PROMPT = """You are an expert at making fun facts engaging and relevant for meetings.
