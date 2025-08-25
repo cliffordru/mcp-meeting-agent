@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "mcp-meeting-agent": {
+      "url": "http://127.0.0.1:8000/sse",
+      "description": "Meeting preparation agent that provides trivia, fun facts, and GitHub trending repositories"
+    }
+  }
+}
