@@ -50,7 +50,7 @@ Original fun fact: {fun_fact}
 
 Meeting context: {meeting_context}
 
-Please improve this fun fact to make it more engaging and relevant for this specific meeting. Consider:
+Please enhance this fun fact to make it more engaging and relevant for this specific meeting. Consider:
 1. How to connect it to the meeting context or industry
 2. How to make it more relatable to the audience
 3. Adding a brief explanation or connection to work/tech
@@ -65,7 +65,7 @@ Current trending repositories:
 
 Meeting context: {meeting_context}
 
-Please improve this list to make it more relevant and engaging for this specific meeting. Consider:
+Please enhance this list to make it more relevant and engaging for this specific meeting. Consider:
 1. Which repositories are most relevant to the meeting context
 2. How to explain why these repos are trending
 3. How to connect them to the team's work or interests

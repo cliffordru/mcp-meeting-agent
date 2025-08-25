@@ -28,13 +28,13 @@ async def tech_trivia_agent(ctx=None, meeting_context: str = "") -> str:
         if ctx and meeting_context:
             try:
                 llm = LLMGateway().chat_model
-                improvement_prompt = TECH_TRIVIA_PROMPT.format(
+                prompt = TECH_TRIVIA_PROMPT.format(
                     question=trivia.question,
                     answer=trivia.correct_answer,
                     meeting_context=meeting_context
                 )
                 
-                response = await llm.ainvoke([{"role": "user", "content": improvement_prompt}])
+                response = await llm.ainvoke([{"role": "user", "content": prompt}])
                 return response.content
             except Exception as e:
                 logger.warning(f"Failed to improve trivia with LLM: {e}")
@@ -62,12 +62,12 @@ async def fun_facts_agent(ctx=None, meeting_context: str = "") -> str:
         if ctx and meeting_context:
             try:
                 llm = LLMGateway().chat_model
-                improvement_prompt = FUN_FACT_PROMPT.format(
+                prompt = FUN_FACT_PROMPT.format(
                     fun_fact=fun_fact.text,
                     meeting_context=meeting_context
                 )
                 
-                response = await llm.ainvoke([{"role": "user", "content": improvement_prompt}])
+                response = await llm.ainvoke([{"role": "user", "content": prompt}])
                 return response.content
             except Exception as e:
                 logger.warning(f"Failed to improve fun fact with LLM: {e}")
@@ -102,12 +102,12 @@ async def github_trending_agent(ctx=None, meeting_context: str = "") -> str:
                     for repo in trending_repos[:5]  # Limit to top 5 for context
                 ])
                 
-                improvement_prompt = TRENDING_PROMPT.format(
+                prompt = TRENDING_PROMPT.format(
                     trending_repos=repos_text,
                     meeting_context=meeting_context
                 )
                 
-                response = await llm.ainvoke([{"role": "user", "content": improvement_prompt}])
+                response = await llm.ainvoke([{"role": "user", "content": prompt}])
                 return response.content
             except Exception as e:
                 logger.warning(f"Failed to improve trending repos with LLM: {e}")
