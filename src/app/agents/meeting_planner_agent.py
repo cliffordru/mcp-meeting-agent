@@ -86,6 +86,8 @@ class MeetingPlannerAgent:
             else:
                 input_text = f"Prepare meeting notes for: a general tech meeting"
             
+            logger.info("Executing agent with input", input_text=input_text[:100] + "..." if len(input_text) > 100 else input_text)
+            
             # Add timeout to the agent execution
             result = await asyncio.wait_for(
                 self.agent_executor.ainvoke({
@@ -96,6 +98,7 @@ class MeetingPlannerAgent:
             )
             
             self._log_execution_time(start_time, True)
+            logger.info("Agent execution completed successfully", output_length=len(result.get("output", "")))
             return result["output"]
             
         except asyncio.TimeoutError:
@@ -104,6 +107,7 @@ class MeetingPlannerAgent:
                 timeout_seconds=settings.AGENT_EXECUTOR_TIMEOUT,
                 context=meeting_context
             )
+            logger.warning("Agent execution timed out, falling back to direct service calls")
             return await self._fallback_plan_meeting()
             
         except Exception as e:
@@ -112,6 +116,7 @@ class MeetingPlannerAgent:
                 error=str(e),
                 context=meeting_context
             )
+            logger.warning("Agent execution failed, falling back to direct service calls", error=str(e))
             return await self._fallback_plan_meeting()
     
     async def _fallback_plan_meeting(self) -> str:

@@ -28,9 +28,9 @@ class Settings(BaseSettings):
 
     # Timeout Configuration (in seconds)
     API_TIMEOUT: int = 30  # Increased from 10 to 30 seconds for rate-limited APIs
-    LLM_REQUEST_TIMEOUT: int = 60  # Increased from 15 to 60 seconds for complex agent operations
-    AGENT_EXECUTOR_TIMEOUT: int = 120  # New: 2 minutes for agent execution
-    MCP_TOOL_TIMEOUT: int = 150  # New: 2.5 minutes for MCP tool execution
+    LLM_REQUEST_TIMEOUT: int = 120  # Increased from 60 to 120 seconds for complex agent operations
+    AGENT_EXECUTOR_TIMEOUT: int = 180  # Increased from 120 to 180 seconds (3 minutes) for agent execution
+    MCP_TOOL_TIMEOUT: int = 240  # Increased from 150 to 240 seconds (4 minutes) for MCP tool execution
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"
