@@ -192,6 +192,7 @@ mcp-meeting-agent/
 │   │   │   └── repository_formatter.py
 │   │   ├── prompts/
 │   │   │   ├── __init__.py
+│   │   │   ├── agent_prompts.py
 │   │   │   └── fallback_prompts.py
 │   │   ├── schemas/
 │   │   │   ├── fun_facts.py
