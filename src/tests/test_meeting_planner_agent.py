@@ -14,7 +14,11 @@ class TestMeetingPlannerAgent:
     @pytest.fixture
     def agent(self):
         """Create a MeetingPlannerAgent instance for testing."""
-        return MeetingPlannerAgent()
+        with patch('app.agents.meeting_planner_agent.LLMGateway') as mock_llm_gateway:
+            # Mock the LLMGateway to avoid API key requirements
+            mock_gateway_instance = MagicMock()
+            mock_llm_gateway.return_value = mock_gateway_instance
+            return MeetingPlannerAgent()
 
     @pytest.mark.asyncio
     async def test_plan_meeting_success(self, agent):
