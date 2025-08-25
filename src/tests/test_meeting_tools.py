@@ -46,7 +46,9 @@ class TestMeetingTools:
             # Call the underlying function directly
             result = await get_tech_trivia.coroutine()
             
-            assert "Unable to fetch tech trivia" in result
+            # Should return fallback content instead of error message
+            assert "Question: What programming language was created by Guido van Rossum?" in result
+            assert "Answer: Python" in result
 
     @pytest.mark.asyncio
     async def test_get_fun_fact_success(self):
@@ -82,7 +84,8 @@ class TestMeetingTools:
             # Call the underlying function directly
             result = await get_fun_fact.coroutine()
             
-            assert "Unable to fetch fun fact" in result
+            # Should return fallback content instead of error message
+            assert "Did you know? The average person spends 6 months of their life waiting for red lights." in result
 
     @pytest.mark.asyncio
     async def test_get_trending_repos_success(self):
@@ -117,4 +120,7 @@ class TestMeetingTools:
             # Call the underlying function directly
             result = await get_trending_repos.coroutine()
             
-            assert "Unable to fetch trending repositories" in result
+            # Should return fallback content instead of error message
+            assert "langchain-ai/langchain" in result
+            assert "openai/openai-python" in result
+            assert "microsoft/vscode" in result

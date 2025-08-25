@@ -93,7 +93,6 @@ LOG_LEVEL=INFO
 
 # FastMCP Configuration
 MCP_MASK_ERROR_DETAILS=true
-MCP_RATE_LIMIT=50/hour
 MCP_ENABLE_LOGGING=true
 ```
 
@@ -195,7 +194,6 @@ mcp-meeting-agent/
 │   │   │   └── meeting_prompts.py
 │   │   ├── schemas/
 │   │   │   ├── fun_facts.py
-│   │   │   ├── meeting_info.py
 │   │   │   └── tech_trivia.py
 │   │   ├── services/
 │   │   │   ├── fun_facts_service.py
@@ -208,10 +206,10 @@ mcp-meeting-agent/
 │       ├── test_github_trending_agent.py
 │       ├── test_github_trending_service.py
 │       ├── test_meeting_notes.py
-│       ├── test_meeting_prompts.py
 │       ├── test_meeting_planner_agent.py
 │       ├── test_meeting_tools.py
 │       ├── test_repository_formatter.py
+│       ├── test_server_integration.py
 │       └── test_tech_trivia_agent.py
 ├── server.py
 ├── env.example
@@ -224,7 +222,7 @@ mcp-meeting-agent/
 
 The MCP server exposes a single tool:
 
-- `prepare_meeting(meeting_info: str)`: Generates meeting preparation content including trivia, fun facts, and trending repositories using LangChain agent orchestration
+- `prepare_meeting(ctx: Context, meeting_context: str = "")`: Generates meeting preparation content including trivia, fun facts, and trending repositories using LangChain agent orchestration with enhanced error handling and context-aware logging
 
 ## Dependencies
 

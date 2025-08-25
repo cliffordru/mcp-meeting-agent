@@ -57,8 +57,12 @@ class TestMCPServerIntegration:
             # Call the agent directly
             result = await planner_agent.plan_meeting()
             
-            # Verify error handling (should use fallback)
-            assert "Unable to prepare meeting information" in result
+            # Verify fallback was used (should generate meeting notes with fallback content)
+            assert "Meeting Notes" in result
+            assert "Tech Trivia" in result or "Icebreaker" in result or "Ice Breaker" in result
+            assert "Fun Fact" in result
+            assert "Trending" in result or "GitHub" in result
+            assert len(result) > 100  # Should be substantial content
 
     @pytest.mark.asyncio
     async def test_prepare_meeting_with_partial_api_failures(self):
@@ -156,8 +160,12 @@ class TestMCPServerIntegration:
             # Call the agent directly
             result = await planner_agent.plan_meeting()
             
-            # Verify fallback was used
-            assert "Unable to prepare meeting information" in result
+            # Verify fallback was used (should generate meeting notes with fallback content)
+            assert "Meeting Notes" in result
+            assert "Tech Trivia" in result or "Icebreaker" in result or "Ice Breaker" in result
+            assert "Fun Fact" in result
+            assert "Trending" in result or "GitHub" in result
+            assert len(result) > 100  # Should be substantial content
 
     @pytest.mark.asyncio
     async def test_server_tool_registration(self):
