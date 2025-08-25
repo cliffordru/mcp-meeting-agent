@@ -56,6 +56,6 @@ class Settings(BaseSettings):
     MCP_ENABLE_LOGGING: bool = True      # Enable MCP client logging
     
     # Agent Configuration
-    USE_ENHANCED_TOOLS: bool = True  # Whether to use enhanced agent tools vs basic tools
+    USE_ENHANCED_TOOLS: bool = True  # Whether to use agent tools vs basic tools
 
 settings = Settings()

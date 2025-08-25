@@ -1,5 +1,5 @@
 """
-Enhanced agent tools that wrap agent classes with LLM reasoning capabilities.
+Agent tools that wrap agent classes with LLM reasoning capabilities.
 These tools provide intelligent enhancement of the basic service data.
 """
 from langchain.tools import tool

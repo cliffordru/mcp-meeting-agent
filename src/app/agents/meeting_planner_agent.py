@@ -1,5 +1,5 @@
 """
-Enhanced LangChain-based meeting planner agent that can use both basic tools and agent tools.
+LangChain-based meeting planner agent that can use both basic tools and agent tools.
 This agent provides intelligent orchestration with context-aware enhancement capabilities.
 """
 import asyncio
@@ -18,8 +18,8 @@ logger = get_logger(__name__)
 
 class MeetingPlannerAgent:
     """
-    Enhanced LangChain-based agent for planning meetings using both basic tools and agent tools.
-    This agent can choose between basic tools (fast, reliable) and enhanced agent tools (intelligent, contextual).
+    LangChain-based agent for planning meetings using both basic tools and agent tools.
+    This agent can choose between basic tools (fast, reliable) and agent tools (intelligent, contextual).
     """
     
     def __init__(self, use_enhanced_tools: bool = True):
@@ -33,7 +33,7 @@ class MeetingPlannerAgent:
                 enhanced_fun_facts_agent, 
                 enhanced_github_trending_agent
             ]
-            logger.info("Using enhanced agent tools for intelligent meeting preparation")
+            logger.info("Using agent tools for intelligent meeting preparation")
         else:
             self.tools = [get_tech_trivia, get_fun_fact, get_trending_repos]
             logger.info("Using basic tools for reliable meeting preparation")
@@ -88,7 +88,7 @@ class MeetingPlannerAgent:
         
         try:
             logger.info(
-                "Starting enhanced LangChain-based meeting planning", 
+                "Starting LangChain-based meeting planning", 
                 context=meeting_context,
                 enhanced_tools=self.use_enhanced_tools,
                 timeout_seconds=settings.AGENT_EXECUTOR_TIMEOUT
@@ -96,7 +96,7 @@ class MeetingPlannerAgent:
             
             # Prepare input with context for enhanced tools
             if self.use_enhanced_tools and meeting_context:
-                input_text = f"Prepare enhanced meeting notes for: {meeting_context}. Use the enhanced tools to make content more relevant and engaging."
+                input_text = f"Prepare meeting notes for: {meeting_context}. Use the agent tools to make content more relevant and engaging."
             else:
                 input_text = f"Prepare meeting notes for: {meeting_context or 'a general tech meeting'}"
             

@@ -11,7 +11,7 @@ from src.app.core.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Initialize the enhanced meeting planner agent
+# Initialize the meeting planner agent
 planner_agent = MeetingPlannerAgent(use_enhanced_tools=settings.USE_ENHANCED_TOOLS)
 
 # Initialize FastMCP server
@@ -20,7 +20,7 @@ mcp = FastMCP(
     mask_error_details=settings.MCP_MASK_ERROR_DETAILS
 )
 
-logger.info("MCP server initialized with enhanced LangChain-based planner agent")
+logger.info("MCP server initialized with LangChain-based planner agent")
 
 
 @mcp.tool
@@ -31,7 +31,7 @@ async def prepare_meeting(ctx: Context, meeting_context: str = "", use_enhanced:
     Args:
         ctx: MCP context for logging and LLM sampling
         meeting_context: Description of the meeting (type, audience, topic, etc.)
-        use_enhanced: Whether to use enhanced agent tools (default: from config)
+        use_enhanced: Whether to use agent tools (default: from config)
     
     Returns:
         Formatted meeting notes ready for the host

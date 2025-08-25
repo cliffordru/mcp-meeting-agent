@@ -1,5 +1,5 @@
 """
-Tests for the Enhanced Meeting Planner Agent.
+Tests for the Meeting Planner Agent with agent tools support.
 """
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
@@ -17,7 +17,7 @@ class TestMeetingPlannerAgent:
 
     @pytest.fixture
     def agent_enhanced(self):
-        """Create agent with enhanced tools."""
+        """Create agent with agent tools."""
         return MeetingPlannerAgent(use_enhanced_tools=True)
 
     def test_agent_initialization_basic(self, agent_basic):
@@ -31,10 +31,10 @@ class TestMeetingPlannerAgent:
         assert "get_trending_repos" in tool_names
 
     def test_agent_initialization_enhanced(self, agent_enhanced):
-        """Test agent initialization with enhanced tools."""
+        """Test agent initialization with agent tools."""
         assert agent_enhanced.use_enhanced_tools is True
         assert len(agent_enhanced.tools) == 3
-        # Check that enhanced tools are used
+        # Check that agent tools are used
         tool_names = [tool.name for tool in agent_enhanced.tools]
         assert "enhanced_tech_trivia_agent" in tool_names
         assert "enhanced_fun_facts_agent" in tool_names
@@ -53,24 +53,24 @@ class TestMeetingPlannerAgent:
 
     @patch('app.agents.meeting_planner_agent.AgentExecutor.ainvoke')
     async def test_plan_meeting_success_enhanced(self, mock_ainvoke, agent_enhanced):
-        """Test successful meeting planning with enhanced tools."""
-        mock_result = {"output": "Enhanced meeting notes"}
+        """Test successful meeting planning with agent tools."""
+        mock_result = {"output": "Meeting notes with agent tools"}
         mock_ainvoke.return_value = mock_result
 
         result = await agent_enhanced.plan_meeting("test meeting")
 
-        assert result == "Enhanced meeting notes"
+        assert result == "Meeting notes with agent tools"
         mock_ainvoke.assert_called_once()
 
     @patch('app.agents.meeting_planner_agent.AgentExecutor.ainvoke')
     async def test_plan_meeting_with_enhanced_override(self, mock_ainvoke, agent_basic):
-        """Test meeting planning with enhanced tools override."""
-        mock_result = {"output": "Enhanced meeting notes with override"}
+        """Test meeting planning with agent tools override."""
+        mock_result = {"output": "Meeting notes with agent tools override"}
         mock_ainvoke.return_value = mock_result
 
         result = await agent_basic.plan_meeting("test meeting", use_enhanced=True)
 
-        assert result == "Enhanced meeting notes with override"
+        assert result == "Meeting notes with agent tools override"
         assert agent_basic.use_enhanced_tools is True
         mock_ainvoke.assert_called_once()
 
