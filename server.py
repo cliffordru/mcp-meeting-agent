@@ -33,7 +33,7 @@ async def prepare_meeting(ctx: Context, meeting_context: str = "") -> str:
     start_time = asyncio.get_event_loop().time()
     
     # Log to MCP client for better debugging
-    ctx.info(f"Starting meeting preparation", context=meeting_context)
+    ctx.info(f"Starting meeting preparation for: {meeting_context or 'general meeting'}")
     
     try:
         logger.info(
