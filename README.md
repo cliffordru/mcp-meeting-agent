@@ -1,6 +1,6 @@
 # MCP Meeting Agent
 
-A meeting preparation agent that provides trivia, fun facts, and GitHub trending repositories to enhance your meetings.
+A meeting preparation agent that provides trivia, fun facts, and GitHub trending repositories to enhance your meetings. Built with LangChain's modern agent framework for intelligent orchestration and tool-based interactions.
 
 ## Proof of Concept
 
@@ -12,20 +12,31 @@ A meeting preparation agent that provides trivia, fun facts, and GitHub trending
 - **Fun Facts**: Provides interesting random facts from Useless Facts API
 - **GitHub Trending**: Shows current trending repositories from OSS Insight API
 - **Meeting Notes**: Generates formatted meeting notes for hosts
-- **LLM Integration**: Uses Large Language Models for intelligent content formatting
+- **LangChain Agent Framework**: Modern LLM agent architecture with tool-based orchestration
+- **Intelligent Tool Coordination**: Agent automatically selects and uses appropriate tools
+- **Robust Error Handling**: Graceful fallbacks and comprehensive error recovery
 - **Structured Logging**: Comprehensive logging with configurable levels
 - **Comprehensive Testing**: Full test coverage for all components
 
 ## Architecture
 
-The project follows a clean architecture with separation of concerns:
+The project follows a modern LangChain agent architecture with clean separation of concerns:
 
-- **Agents**: High-level orchestrators that coordinate services
+- **LangChain Agents**: Intelligent orchestrators that coordinate tools using LLM reasoning
+- **Tools**: Reusable LangChain tools that wrap external services and APIs
 - **Services**: Handle external API interactions and data fetching
 - **Schemas**: Pydantic models for data validation and structure
 - **Formatters**: Format data for different output types (LLM, notes)
 - **Prompts**: Manage LLM prompt templates
 - **Core**: Configuration, logging, and LLM gateway
+
+### Key Architectural Benefits
+
+- **Tool-Based Design**: Individual tools can be reused across different agents
+- **Intelligent Orchestration**: Agent uses LLM reasoning to determine which tools to use
+- **Better Error Handling**: Tools have individual error handling with graceful fallbacks
+- **Enhanced Flexibility**: Easy to add new tools without changing agent logic
+- **Modern LLM Patterns**: Follows LangChain's recommended agent-tool architecture
 
 ## Quick Start
 
@@ -96,7 +107,7 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### Testing & Quality Assurance
 
-**Current State**: Basic unit tests with 82% coverage
+**Current State**: Comprehensive unit tests with good coverage
 **Production Needs**:
 - **Load Testing**: Apache Bench, Artillery, or k6 for API performance testing
 - **Integration Testing**: End-to-end testing with real API dependencies
@@ -118,7 +129,7 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### Performance & Scalability
 
-**Current State**: Basic async implementation
+**Current State**: Async implementation with LangChain agent framework
 **Production Needs**:
 - **Caching**: TBD based on load testing
 - **Circuit Breakers**: Resilience patterns for external API failures
@@ -126,15 +137,21 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### AI Architecture Improvements
 
-**Current State**: Basic LLM integration
+**Current State**: LangChain agent framework with tool-based architecture and hardcoded fallback content for API failures
 **Production Needs**:
 - **Model-as-a-Service**: Right-sized models for cost/latency/accuracy balance
 - **Prompt Engineering**: Systematic prompt optimization and versioning
-- **Reduce Manual Parsing**: Could test and evaluate tradeoffs on using an LLM to process all raw external API responses to reduce brittle parsing code currently in place.
+- **Agent Optimization**: Fine-tune agent prompts and tool selection logic
+- **Tool Validation**: Enhanced input/output validation for tools
+- **LLM-Generated Fallbacks**: Replace hardcoded fallback content with dynamic LLM-generated content when APIs fail
+  - Generate contextual trivia questions based on meeting type/context
+  - Create relevant fun facts tailored to the audience/industry
+  - Provide trending tech topics specific to the team's domain
+  - Maintain content freshness and relevance through AI generation
 
 ### Integration & Real-World Services
 
-**Current State**: Basic external APIs
+**Current State**: Basic external APIs with tool-based access
 **Production Needs**:
 - **GitHub Integration**: Real-time issues, PRs, and repository health
 - **CI/CD Integration**: Build status and deployment information
@@ -146,7 +163,7 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 ### Monitoring & Alerting
 **Current State**: Basic structured logging
 **Production Needs**:
-- **Observability & Alerting**:
+- **Observability & Alerting**: Enhanced monitoring for agent performance and tool usage
 
 ## Project Structure
 
@@ -158,7 +175,7 @@ mcp-meeting-agent/
 │   │   │   ├── tech_trivia_agent.py
 │   │   │   ├── fun_facts_agent.py
 │   │   │   ├── github_trending_agent.py
-│   │   │   └── planner_agent.py
+│   │   │   └── meeting_planner_agent.py
 │   │   ├── core/
 │   │   │   ├── config.py
 │   │   │   ├── llm_gateway.py
@@ -172,18 +189,20 @@ mcp-meeting-agent/
 │   │   │   ├── fun_facts.py
 │   │   │   ├── meeting_info.py
 │   │   │   └── tech_trivia.py
-│   │   └── services/
-│   │       ├── fun_facts_service.py
-│   │       ├── github_trending_service.py
-│   │       └── tech_trivia_service.py
+│   │   ├── services/
+│   │   │   ├── fun_facts_service.py
+│   │   │   ├── github_trending_service.py
+│   │   │   └── tech_trivia_service.py
+│   │   └── tools/
+│   │       └── meeting_tools.py
 │   └── tests/
 │       ├── test_fun_facts.py
 │       ├── test_github_trending_agent.py
 │       ├── test_github_trending_service.py
-│       ├── test_llm_gateway.py
 │       ├── test_meeting_notes.py
 │       ├── test_meeting_prompts.py
-│       ├── test_planner_agent.py
+│       ├── test_meeting_planner_agent.py
+│       ├── test_meeting_tools.py
 │       ├── test_repository_formatter.py
 │       └── test_tech_trivia_agent.py
 ├── server.py
@@ -197,7 +216,7 @@ mcp-meeting-agent/
 
 The MCP server exposes a single tool:
 
-- `prepare_meeting(meeting_info: str)`: Generates meeting preparation content including trivia, fun facts, and trending repositories
+- `prepare_meeting(meeting_info: str)`: Generates meeting preparation content including trivia, fun facts, and trending repositories using LangChain agent orchestration
 
 ## Dependencies
 
@@ -205,8 +224,11 @@ The MCP server exposes a single tool:
 - **aiohttp**: Async HTTP client
 - **pydantic**: Data validation
 - **structlog**: Structured logging
-- **langchain**: LLM integration
+- **langchain**: LLM integration and agent framework
+- **langchain-core**: Core LangChain components
+- **langchain-openai**: OpenAI integration for LangChain
 - **pytest**: Testing framework
+- **pytest-asyncio**: Async test support
 
 **Note**: Langfuse observability is included in dependencies but not yet implemented in the current version.
 

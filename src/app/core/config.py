@@ -27,7 +27,10 @@ class Settings(BaseSettings):
     GITHUB_TRENDING_URL: str = "https://api.ossinsight.io/v1/trends/repos/"
 
     # Timeout Configuration (in seconds)
-    API_TIMEOUT: int = 10
+    API_TIMEOUT: int = 30  # Increased from 10 to 30 seconds for rate-limited APIs
+    LLM_REQUEST_TIMEOUT: int = 60  # Increased from 15 to 60 seconds for complex agent operations
+    AGENT_EXECUTOR_TIMEOUT: int = 120  # New: 2 minutes for agent execution
+    MCP_TOOL_TIMEOUT: int = 150  # New: 2.5 minutes for MCP tool execution
 
     # Logging Configuration
     LOG_LEVEL: str = "INFO"
@@ -42,7 +45,6 @@ class Settings(BaseSettings):
     LLM_API_BASE_URL: Optional[str] = None
     LLM_MODEL: Optional[str] = None
     LLM_TEMPERATURE: float = 0.0  # Use 0 for deterministic, structured output
-    LLM_REQUEST_TIMEOUT: int = 15  # Set a 15-second timeout for API calls
 
     # Optional Langfuse settings
     LANGFUSE_SECRET_KEY: Optional[SecretStr] = None
