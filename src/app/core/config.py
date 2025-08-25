@@ -54,5 +54,8 @@ class Settings(BaseSettings):
     # FastMCP Configuration
     MCP_MASK_ERROR_DETAILS: bool = True  # Hide internal errors from clients
     MCP_ENABLE_LOGGING: bool = True      # Enable MCP client logging
+    
+    # Agent Configuration
+    USE_ENHANCED_TOOLS: bool = True  # Whether to use enhanced agent tools vs basic tools
 
 settings = Settings()
