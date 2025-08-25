@@ -56,6 +56,9 @@ The project follows a clean architecture with separation of concerns:
 
    The server runs on `http://127.0.0.1:8000/sse` by default and provides the `prepare_meeting()` tool for generating meeting content.
 
+6. **Use**:
+   For example in Cursor, you can prompt your AI assistant "Using your MCP tools, prepare some fun meeting notes".
+
 ## Configuration
 
 Key configuration options in `.env`:
