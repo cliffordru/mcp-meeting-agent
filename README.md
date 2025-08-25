@@ -206,6 +206,8 @@ The server runs on `http://127.0.0.1:8000/sse` by default and provides the `prep
 - **langchain**: LLM integration
 - **pytest**: Testing framework
 
+**Note**: Langfuse observability is included in dependencies but not yet implemented in the current version.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
