@@ -3,7 +3,6 @@ LangChain-based meeting planner agent that coordinates tools for meeting prepara
 """
 import asyncio
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.messages import HumanMessage, AIMessage
 
 from ..tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
 from ..core.llm_gateway import LLMGateway
@@ -36,6 +35,26 @@ class MeetingPlannerAgent:
             verbose=True
         )
     
+    def _log_execution_time(self, start_time: float, success: bool, **kwargs):
+        """Log execution time with consistent formatting."""
+        execution_time = asyncio.get_event_loop().time() - start_time
+        execution_time_rounded = round(execution_time, 2)
+        
+        if success:
+            logger.info(
+                "Successfully completed operation",
+                execution_time_seconds=execution_time_rounded,
+                **kwargs
+            )
+        else:
+            logger.error(
+                "Operation failed",
+                execution_time_seconds=execution_time_rounded,
+                **kwargs
+            )
+        
+        return execution_time_rounded
+    
     async def plan_meeting(self, meeting_context: str = "") -> str:
         """Plan a meeting using the LangChain agent framework."""
         start_time = asyncio.get_event_loop().time()
@@ -56,29 +75,21 @@ class MeetingPlannerAgent:
                 timeout=settings.AGENT_EXECUTOR_TIMEOUT
             )
             
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.info(
-                "Successfully completed meeting planning with LangChain agent",
-                execution_time_seconds=round(execution_time, 2)
-            )
+            self._log_execution_time(start_time, True)
             return result["output"]
             
         except asyncio.TimeoutError:
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.error(
-                "LangChain agent execution timed out",
+            self._log_execution_time(
+                start_time, False,
                 timeout_seconds=settings.AGENT_EXECUTOR_TIMEOUT,
-                execution_time_seconds=round(execution_time, 2),
                 context=meeting_context
             )
             return await self._fallback_plan_meeting()
             
         except Exception as e:
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.error(
-                "Error in LangChain meeting planning", 
+            self._log_execution_time(
+                start_time, False,
                 error=str(e),
-                execution_time_seconds=round(execution_time, 2),
                 context=meeting_context
             )
             return await self._fallback_plan_meeting()
@@ -122,26 +133,13 @@ class MeetingPlannerAgent:
                 trivia_question, fun_fact, trending_repos
             )
             
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.info(
-                "Successfully completed fallback meeting planning",
-                execution_time_seconds=round(execution_time, 2)
-            )
+            self._log_execution_time(start_time, True)
             return result
             
         except asyncio.TimeoutError:
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.error(
-                "Fallback meeting planning timed out",
-                execution_time_seconds=round(execution_time, 2)
-            )
+            self._log_execution_time(start_time, False)
             return "Unable to prepare meeting information due to timeout."
             
         except Exception as e:
-            execution_time = asyncio.get_event_loop().time() - start_time
-            logger.error(
-                "Error in fallback meeting planning", 
-                error=str(e),
-                execution_time_seconds=round(execution_time, 2)
-            )
+            self._log_execution_time(start_time, False, error=str(e))
             return "Unable to prepare meeting information at this time."

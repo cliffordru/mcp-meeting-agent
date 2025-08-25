@@ -1,21 +1,19 @@
 """
 Provides a service for interacting with the GitHub Trending API.
 """
-import aiohttp
 from typing import List
-
-from ..core.config import settings
+from . import BaseService
 from ..core.logging_config import get_logger
+from ..core.config import settings
 
 logger = get_logger(__name__)
 
 
-class GitHubTrendingService:
+class GitHubTrendingService(BaseService):
     """A service class for handling GitHub Trending API interactions."""
 
     def __init__(self):
-        self.api_url = settings.GITHUB_TRENDING_URL
-        self.timeout = settings.API_TIMEOUT
+        super().__init__(settings.GITHUB_TRENDING_URL)
 
     async def get_trending_repos(self) -> List[dict]:
         """
@@ -24,60 +22,30 @@ class GitHubTrendingService:
         Returns:
             A list of trending repository dictionaries.
         """
-        async with aiohttp.ClientSession() as client:
-            try:
-                async with client.get(
-                    self.api_url,
-                    timeout=aiohttp.ClientTimeout(total=self.timeout)
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+        data = await self._make_request()  # No validation model for this API
+        
+        # Extract repository data from the response
+        repos = []
+        if isinstance(data, dict) and 'data' in data:
+            for item in data['data']:
+                if isinstance(item, dict):
+                    repo = {
+                        'name': item.get('repo_name', 'Unknown'),
+                        'description': item.get('description', 'No description available'),
+                        'language': item.get('language', 'Unknown'),
+                        'stars': item.get('stars', 0),
+                        'url': f"https://github.com/{item.get('repo_name', '')}"
+                    }
+                    repos.append(repo)
 
-                    # Extract repository data from the response
-                    repos = []
-                    if isinstance(data, dict) and 'data' in data:
-                        for item in data['data']:
-                            if isinstance(item, dict):
-                                repo = {
-                                    'name': item.get('repo_name', 'Unknown'),
-                                    'description': item.get('description', 'No description available'),
-                                    'language': item.get('language', 'Unknown'),
-                                    'stars': item.get('stars', 0),
-                                    'url': f"https://github.com/{item.get('repo_name', '')}"
-                                }
-                                repos.append(repo)
+        if repos:
+            logger.info(f"Successfully fetched {len(repos)} trending repos from API")
+            return repos
+        else:
+            logger.warning("No trending repositories found in API response")
+            return self._get_fallback_data()
 
-                    if repos:
-                        logger.info(f"Successfully fetched {len(repos)} trending repos from API")
-                        return repos
-                    else:
-                        logger.warning("No trending repositories found in API response")
-                        return self._get_fallback_repos()
-
-            except aiohttp.ClientResponseError as e:
-                logger.error(
-                    "Error fetching trending repos",
-                    error=str(e),
-                    status_code=e.status,
-                    url=self.api_url
-                )
-                return self._get_fallback_repos()
-            except aiohttp.ClientError as e:
-                logger.error(
-                    "Error fetching trending repos",
-                    error=str(e),
-                    url=self.api_url
-                )
-                return self._get_fallback_repos()
-            except Exception as e:
-                logger.error(
-                    "Unexpected error while fetching trending repos",
-                    error=str(e),
-                    url=self.api_url
-                )
-                return self._get_fallback_repos()
-
-    def _get_fallback_repos(self) -> List[dict]:
+    def _get_fallback_data(self) -> List[dict]:
         """Returns fallback trending repositories when the API is unavailable."""
         logger.info("Using fallback trending repositories")
         return [
