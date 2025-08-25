@@ -1,6 +1,6 @@
 # server.py
 from fastmcp import FastMCP
-from src.app.agents.planner_agent import PlannerAgent
+from src.app.agents.meeting_planner_agent import MeetingPlannerAgent
 from src.app.core.config import settings
 from src.app.core.logging_config import setup_logging, get_logger
 
@@ -13,9 +13,9 @@ mcp = FastMCP(
     instructions="A meeting preparation agent that prepares interesting meeting notes for the user.",
     )
 
-# Initialize the planner agent
-planner_agent = PlannerAgent()
-logger.info("MCP server initialized with planner agent")
+# Initialize the LangChain-based planner agent
+planner_agent = MeetingPlannerAgent()
+logger.info("MCP server initialized with LangChain-based planner agent")
 
 @mcp.prompt
 def prepare_meeting_prompt() -> str:
@@ -28,7 +28,7 @@ async def prepare_meeting() -> str:
     """Prepares a meeting for the user."""
     logger.info("Meeting preparation requested")
     try:
-        result = await planner_agent.plan_meeting_async()
+        result = await planner_agent.plan_meeting()
         logger.info("Meeting preparation completed successfully")
         return result
     except Exception as e:
