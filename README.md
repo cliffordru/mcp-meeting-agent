@@ -137,12 +137,17 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### AI Architecture Improvements
 
-**Current State**: LangChain agent framework with tool-based architecture
+**Current State**: LangChain agent framework with tool-based architecture and hardcoded fallback content for API failures
 **Production Needs**:
 - **Model-as-a-Service**: Right-sized models for cost/latency/accuracy balance
 - **Prompt Engineering**: Systematic prompt optimization and versioning
 - **Agent Optimization**: Fine-tune agent prompts and tool selection logic
 - **Tool Validation**: Enhanced input/output validation for tools
+- **LLM-Generated Fallbacks**: Replace hardcoded fallback content with dynamic LLM-generated content when APIs fail
+  - Generate contextual trivia questions based on meeting type/context
+  - Create relevant fun facts tailored to the audience/industry
+  - Provide trending tech topics specific to the team's domain
+  - Maintain content freshness and relevance through AI generation
 
 ### Integration & Real-World Services
 
