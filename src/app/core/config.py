@@ -1,0 +1,52 @@
+"""
+Handles application configuration using Pydantic Settings.
+
+This module defines the `Settings` class, which loads configuration values
+from environment variables and a .env file.
+"""
+from typing import Optional
+from pydantic import SecretStr, ConfigDict
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    """
+    Defines the application's configuration settings.
+    
+    Pydantic automatically reads these settings from environment variables
+    or a .env file.
+    """
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding='utf-8',
+        extra='ignore'
+    )
+
+    # API Configuration
+    TECH_TRIVIA_API_URL: str = "https://opentdb.com/api.php?amount=1&category=18&type=multiple"
+    FUN_FACTS_API_URL: str = "https://uselessfacts.jsph.pl/random.json?language=en"
+    GITHUB_TRENDING_URL: str = "https://api.ossinsight.io/v1/trends/repos/"
+
+    # Timeout Configuration (in seconds)
+    API_TIMEOUT: int = 10
+
+    # Logging Configuration
+    LOG_LEVEL: str = "INFO"
+
+    # Server Configuration
+    MCP_HOST: str = "127.0.0.1"
+    MCP_PORT: int = 8000
+    MCP_TRANSPORT: str = "sse"
+
+    # LLM Configuration (for future use)
+    LLM_API_KEY: Optional[SecretStr] = None
+    LLM_API_BASE_URL: Optional[str] = None
+    LLM_MODEL: Optional[str] = None
+    LLM_TEMPERATURE: float = 0.0  # Use 0 for deterministic, structured output
+    LLM_REQUEST_TIMEOUT: int = 15  # Set a 15-second timeout for API calls
+
+    # Optional Langfuse settings
+    LANGFUSE_SECRET_KEY: Optional[SecretStr] = None
+    LANGFUSE_PUBLIC_KEY: Optional[str] = None
+    LANGFUSE_HOST: Optional[str] = None
+
+settings = Settings()
