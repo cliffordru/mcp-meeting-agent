@@ -7,7 +7,10 @@ from fastmcp.exceptions import ToolError
 
 from src.app.agents.meeting_planner_agent import MeetingPlannerAgent
 from src.app.core.config import settings
-from src.app.core.logging_config import get_logger
+from src.app.core.logging_config import setup_logging, get_logger
+
+# Initialize logging first
+setup_logging()
 
 logger = get_logger(__name__)
 
