@@ -14,12 +14,12 @@ class GitHubTrendingAgent:
     def __init__(self):
         self._service = GitHubTrendingService()
 
-    async def get_trending_repos(self) -> List[str]:
+    async def get_trending_repos(self) -> List[dict]:
         """
         Fetches trending repositories from GitHub.
 
         Returns:
-            A list of repository names as strings.
+            A list of repository dictionaries.
         """
         trending_repos = await self._service.get_trending_repos()
         return trending_repos

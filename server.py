@@ -1,99 +1,90 @@
-# server.py
+"""
+MCP Server for Meeting Preparation Agent.
+"""
 import asyncio
 from fastmcp import FastMCP, Context
 from fastmcp.exceptions import ToolError
+
 from src.app.agents.meeting_planner_agent import MeetingPlannerAgent
 from src.app.core.config import settings
-from src.app.core.logging_config import setup_logging, get_logger
+from src.app.core.logging_config import get_logger
 
-# Setup logging
-setup_logging()
 logger = get_logger(__name__)
 
-# Production-ready FastMCP configuration
+# Initialize the meeting planner agent
+planner_agent = MeetingPlannerAgent()
+
+# Initialize FastMCP server
 mcp = FastMCP(
-    name="Meeting Preparation Agent",
-    instructions="A meeting preparation agent that prepares interesting meeting notes for the user.",
-    mask_error_details=settings.MCP_MASK_ERROR_DETAILS,  # Configurable error masking
+    "Meeting Preparation Agent",
+    mask_error_details=settings.MCP_MASK_ERROR_DETAILS
 )
 
-# Initialize the LangChain-based planner agent
-planner_agent = MeetingPlannerAgent()
 logger.info("MCP server initialized with LangChain-based planner agent")
 
-@mcp.prompt
-def prepare_meeting_prompt() -> str:
-    """Creates a prompt asking for meeting info."""
-    logger.info("Meeting prompt requested")
-    return "Please prepare a meeting for the user."
 
 @mcp.tool
 async def prepare_meeting(ctx: Context, meeting_context: str = "") -> str:
-    """Prepares a meeting for the user with enhanced error handling and context."""
+    """
+    Prepare comprehensive meeting notes with trivia, fun facts, and trending repositories.
+    
+    Args:
+        ctx: MCP context for logging and LLM sampling
+        meeting_context: Description of the meeting (type, audience, topic, etc.)
+    
+    Returns:
+        Formatted meeting notes ready for the host
+    """
     start_time = asyncio.get_event_loop().time()
     
-    # Log to MCP client for better debugging
-    ctx.info(f"Starting meeting preparation for: {meeting_context or 'general meeting'}")
-    
     try:
-        logger.info(
-            "Meeting preparation requested",
-            timeout_seconds=settings.MCP_TOOL_TIMEOUT,
-            context=meeting_context
-        )
+        ctx.info(f"Starting meeting preparation for: {meeting_context or 'general meeting'}")
         
-        # Add timeout to the entire tool execution
+        # Add timeout to the tool execution
         result = await asyncio.wait_for(
             planner_agent.plan_meeting(meeting_context),
             timeout=settings.MCP_TOOL_TIMEOUT
         )
         
         execution_time = asyncio.get_event_loop().time() - start_time
-        
-        # Log success to both server and MCP client
         logger.info(
-            "Meeting preparation completed successfully",
-            execution_time_seconds=round(execution_time, 2)
+            "Successfully prepared meeting notes",
+            execution_time_seconds=round(execution_time, 2),
+            context=meeting_context
         )
-        ctx.info(f"Meeting preparation completed in {round(execution_time, 2)}s")
         
         return result
         
     except asyncio.TimeoutError:
         execution_time = asyncio.get_event_loop().time() - start_time
-        error_msg = "Meeting preparation timed out. Please try again."
-        
         logger.error(
             "Meeting preparation timed out",
-            timeout_seconds=settings.MCP_TOOL_TIMEOUT,
             execution_time_seconds=round(execution_time, 2),
+            timeout_seconds=settings.MCP_TOOL_TIMEOUT,
             context=meeting_context
         )
-        ctx.error(f"Meeting preparation timed out after {round(execution_time, 2)}s")
-        
-        # Use ToolError for client-visible timeout errors
-        raise ToolError(error_msg)
+        ctx.error("Meeting preparation timed out")
+        raise ToolError("Meeting preparation timed out. Please try again.")
         
     except Exception as e:
         execution_time = asyncio.get_event_loop().time() - start_time
-        
-        # Log detailed error internally
         logger.error(
-            "Error in meeting preparation", 
-            error=str(e),
+            "Error in meeting preparation",
             execution_time_seconds=round(execution_time, 2),
+            error=str(e),
             context=meeting_context
         )
-        
-        # Log generic error to MCP client
-        ctx.error(f"Meeting preparation failed after {round(execution_time, 2)}s")
-        
-        # Use ToolError for client-visible errors, masking internal details
-        raise ToolError("Unable to prepare meeting at this time. Please try again later.")
+        ctx.error("Failed to prepare meeting notes")
+        raise ToolError("Unable to prepare meeting notes at this time.")
+
 
 if __name__ == "__main__":
-    logger.info("Starting MCP server", 
-                host=settings.MCP_HOST, 
-                port=settings.MCP_PORT, 
-                transport=settings.MCP_TRANSPORT)
-    mcp.run(transport=settings.MCP_TRANSPORT, host=settings.MCP_HOST, port=settings.MCP_PORT)
+    logger.info("Starting MCP server", host=settings.MCP_HOST, port=settings.MCP_PORT, transport=settings.MCP_TRANSPORT)
+    
+    # Run the MCP server
+    mcp.run(
+        transport=settings.MCP_TRANSPORT,
+        host=settings.MCP_HOST,
+        port=settings.MCP_PORT,
+        log_level=settings.MCP_LOG_LEVEL if hasattr(settings, 'MCP_LOG_LEVEL') else "INFO"
+    )
