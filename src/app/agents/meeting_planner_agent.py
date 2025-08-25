@@ -7,10 +7,13 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 
 from ..tools.agent_tools import tech_trivia_agent, fun_facts_agent, github_trending_agent
 from ..core.llm_gateway import LLMGateway
-from ..core.logging_config import get_logger
+from ..core.logging_config import setup_logging, get_logger
 from ..core.config import settings
 from ..formatters.meeting_notes_formatter import MeetingNotesFormatter
 from ..prompts.agent_prompts import MEETING_PLANNER_PROMPT
+
+# Initialize logging
+setup_logging()
 
 logger = get_logger(__name__)
 

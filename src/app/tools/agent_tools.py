@@ -7,10 +7,13 @@ from ..agents.tech_trivia_agent import TechTriviaAgent
 from ..agents.fun_facts_agent import FunFactsAgent
 from ..agents.github_trending_agent import GitHubTrendingAgent
 from ..core.llm_gateway import LLMGateway
-from ..core.logging_config import get_logger
+from ..core.logging_config import setup_logging, get_logger
 from ..prompts.agent_prompts import TECH_TRIVIA_PROMPT, FUN_FACT_PROMPT, TRENDING_PROMPT
 import asyncio
 from ..core.config import settings
+
+# Initialize logging
+setup_logging()
 
 logger = get_logger(__name__)
 
