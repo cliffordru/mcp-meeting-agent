@@ -8,7 +8,7 @@ from ..agents.fun_facts_agent import FunFactsAgent
 from ..agents.github_trending_agent import GitHubTrendingAgent
 from ..core.llm_gateway import LLMGateway
 from ..core.logging_config import get_logger
-from ..prompts.agent_prompts import TECH_TRIVIA_ENHANCEMENT_PROMPT, FUN_FACT_ENHANCEMENT_PROMPT, TRENDING_ENHANCEMENT_PROMPT
+from ..prompts.agent_prompts import TECH_TRIVIA_PROMPT, FUN_FACT_PROMPT, TRENDING_PROMPT
 
 logger = get_logger(__name__)
 
@@ -28,7 +28,7 @@ async def tech_trivia_agent(ctx=None, meeting_context: str = "") -> str:
         if ctx and meeting_context:
             try:
                 llm = LLMGateway().chat_model
-                improvement_prompt = TECH_TRIVIA_ENHANCEMENT_PROMPT.format(
+                improvement_prompt = TECH_TRIVIA_PROMPT.format(
                     question=trivia.question,
                     answer=trivia.correct_answer,
                     meeting_context=meeting_context
@@ -62,7 +62,7 @@ async def fun_facts_agent(ctx=None, meeting_context: str = "") -> str:
         if ctx and meeting_context:
             try:
                 llm = LLMGateway().chat_model
-                improvement_prompt = FUN_FACT_ENHANCEMENT_PROMPT.format(
+                improvement_prompt = FUN_FACT_PROMPT.format(
                     fun_fact=fun_fact.text,
                     meeting_context=meeting_context
                 )
@@ -102,7 +102,7 @@ async def github_trending_agent(ctx=None, meeting_context: str = "") -> str:
                     for repo in trending_repos[:5]  # Limit to top 5 for context
                 ])
                 
-                improvement_prompt = TRENDING_ENHANCEMENT_PROMPT.format(
+                improvement_prompt = TRENDING_PROMPT.format(
                     trending_repos=repos_text,
                     meeting_context=meeting_context
                 )
