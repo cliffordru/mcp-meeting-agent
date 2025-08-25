@@ -8,9 +8,9 @@ A meeting preparation agent that provides trivia, fun facts, and GitHub trending
 
 ## Features
 
-- **Tech Trivia**: Fetches technology trivia questions and answers from Open Trivia Database
-- **Fun Facts**: Provides interesting random facts from Useless Facts API
-- **GitHub Trending**: Shows current trending repositories from OSS Insight API
+- **Tech Trivia**: Fetches technology trivia questions and answers from external APIs
+- **Fun Facts**: Provides interesting random facts from external APIs
+- **GitHub Trending**: Shows current trending repositories from external APIs
 - **Meeting Notes**: Generates formatted meeting notes for hosts
 - **LangChain Agent Framework**: Modern LLM agent architecture with tool-based orchestration
 - **Intelligent Tool Coordination**: Agent automatically selects and uses appropriate tools
@@ -112,9 +112,9 @@ LLM_REQUEST_TIMEOUT=60
 # Google Gemini: LLM_MODEL=gemini-1.5-flash (no base_url needed)
 
 # API Configuration
-TECH_TRIVIA_API_URL=https://opentdb.com/api.php?amount=1&category=18&type=multiple
-FUN_FACTS_API_URL=https://uselessfacts.jsph.pl/random.json?language=en
-GITHUB_TRENDING_URL=https://api.ossinsight.io/v1/trends/repos/
+TECH_TRIVIA_API_URL=your_tech_trivia_api_url
+FUN_FACTS_API_URL=your_fun_facts_api_url
+GITHUB_TRENDING_URL=your_github_trending_api_url
 
 # Logging
 LOG_LEVEL=INFO
