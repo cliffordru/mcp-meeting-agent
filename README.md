@@ -142,13 +142,13 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### AI Architecture Improvements
 
-**Current State**: LangChain agent framework with tool-based architecture and hardcoded fallback content for API failures
+**Current State**: LangChain agent framework with tool-based architecture and LLM-generated fallback content for API failures
 **Production Needs**:
 - **Model-as-a-Service**: Right-sized models for cost/latency/accuracy balance
 - **Prompt Engineering**: Systematic prompt optimization and versioning
 - **Agent Optimization**: Fine-tune agent prompts and tool selection logic
 - **Tool Validation**: Enhanced input/output validation for tools
-- **LLM-Generated Fallbacks**: Replace hardcoded fallback content with dynamic LLM-generated content when APIs fail
+- **Enhanced LLM-Generated Fallbacks**: Improve dynamic LLM-generated content when APIs fail
   - Generate contextual trivia questions based on meeting type/context
   - Create relevant fun facts tailored to the audience/industry
   - Provide trending tech topics specific to the team's domain
@@ -191,7 +191,8 @@ mcp-meeting-agent/
 │   │   │   ├── meeting_notes_formatter.py
 │   │   │   └── repository_formatter.py
 │   │   ├── prompts/
-│   │   │   └── meeting_prompts.py
+│   │   │   ├── __init__.py
+│   │   │   └── fallback_prompts.py
 │   │   ├── schemas/
 │   │   │   ├── fun_facts.py
 │   │   │   └── tech_trivia.py

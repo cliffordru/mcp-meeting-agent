@@ -2,10 +2,10 @@
 Tests for meeting tools.
 """
 import pytest
-from unittest.mock import AsyncMock, patch
-from app.tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
+from unittest.mock import patch, AsyncMock
 from app.schemas.tech_trivia import TechTriviaQuestion
 from app.schemas.fun_facts import FunFact
+from app.tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
 
 
 class TestMeetingTools:
@@ -17,7 +17,7 @@ class TestMeetingTools:
         mock_trivia = TechTriviaQuestion(
             category="Science: Computers",
             type="multiple",
-            difficulty="easy",
+            difficulty="medium",
             question="What is Python?",
             correct_answer="A programming language",
             incorrect_answers=["A snake", "A game", "A database"]
@@ -36,17 +36,39 @@ class TestMeetingTools:
             mock_service.get_tech_trivia.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_tech_trivia_failure(self):
-        """Test tech trivia retrieval failure."""
+    async def test_get_tech_trivia_failure_with_llm_fallback(self):
+        """Test tech trivia retrieval failure with LLM fallback."""
         with patch('app.tools.meeting_tools.TechTriviaService') as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get_tech_trivia.side_effect = Exception("API Error")
             mock_service_class.return_value = mock_service
             
-            # Call the underlying function directly
+            # Mock MCP context with LLM sampling
+            mock_ctx = AsyncMock()
+            mock_response = AsyncMock()
+            mock_response.content = "Question: What is the latest version of React?\nAnswer: React 18"
+            mock_ctx.sample.return_value = mock_response
+            
+            # Call the underlying function directly with context
+            result = await get_tech_trivia.coroutine(ctx=mock_ctx)
+            
+            # Should return LLM-generated fallback content
+            assert "Question: What is the latest version of React?" in result
+            assert "Answer: React 18" in result
+            mock_ctx.sample.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_get_tech_trivia_failure_without_context(self):
+        """Test tech trivia retrieval failure without context (hardcoded fallback)."""
+        with patch('app.tools.meeting_tools.TechTriviaService') as mock_service_class:
+            mock_service = AsyncMock()
+            mock_service.get_tech_trivia.side_effect = Exception("API Error")
+            mock_service_class.return_value = mock_service
+            
+            # Call the underlying function directly without context
             result = await get_tech_trivia.coroutine()
             
-            # Should return fallback content instead of error message
+            # Should return hardcoded fallback content
             assert "Question: What programming language was created by Guido van Rossum?" in result
             assert "Answer: Python" in result
 
@@ -74,18 +96,25 @@ class TestMeetingTools:
             mock_service.get_fun_fact.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_fun_fact_failure(self):
-        """Test fun fact retrieval failure."""
+    async def test_get_fun_fact_failure_with_llm_fallback(self):
+        """Test fun fact retrieval failure with LLM fallback."""
         with patch('app.tools.meeting_tools.FunFactsService') as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get_fun_fact.side_effect = Exception("API Error")
             mock_service_class.return_value = mock_service
             
-            # Call the underlying function directly
-            result = await get_fun_fact.coroutine()
+            # Mock MCP context with LLM sampling
+            mock_ctx = AsyncMock()
+            mock_response = AsyncMock()
+            mock_response.content = "Did you know? The first computer bug was an actual bug!"
+            mock_ctx.sample.return_value = mock_response
             
-            # Should return fallback content instead of error message
-            assert "Did you know? The average person spends 6 months of their life waiting for red lights." in result
+            # Call the underlying function directly with context
+            result = await get_fun_fact.coroutine(ctx=mock_ctx)
+            
+            # Should return LLM-generated fallback content
+            assert "Did you know? The first computer bug was an actual bug!" in result
+            mock_ctx.sample.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_get_trending_repos_success(self):
@@ -110,17 +139,24 @@ class TestMeetingTools:
             mock_service.get_trending_repos.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_get_trending_repos_failure(self):
-        """Test trending repos retrieval failure."""
+    async def test_get_trending_repos_failure_with_llm_fallback(self):
+        """Test trending repos retrieval failure with LLM fallback."""
         with patch('app.tools.meeting_tools.GitHubTrendingService') as mock_service_class:
             mock_service = AsyncMock()
             mock_service.get_trending_repos.side_effect = Exception("API Error")
             mock_service_class.return_value = mock_service
             
-            # Call the underlying function directly
-            result = await get_trending_repos.coroutine()
+            # Mock MCP context with LLM sampling
+            mock_ctx = AsyncMock()
+            mock_response = AsyncMock()
+            mock_response.content = "• react/react - A JavaScript library for building user interfaces\n• vuejs/vue - Progressive JavaScript framework\n• angular/angular - Platform for building mobile and desktop web applications"
+            mock_ctx.sample.return_value = mock_response
             
-            # Should return fallback content instead of error message
-            assert "langchain-ai/langchain" in result
-            assert "openai/openai-python" in result
-            assert "microsoft/vscode" in result
+            # Call the underlying function directly with context
+            result = await get_trending_repos.coroutine(ctx=mock_ctx)
+            
+            # Should return LLM-generated fallback content
+            assert "react/react" in result
+            assert "vuejs/vue" in result
+            assert "angular/angular" in result
+            mock_ctx.sample.assert_called_once()
