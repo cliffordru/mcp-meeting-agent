@@ -2,8 +2,7 @@
 LangChain-based meeting planner agent that coordinates tools for meeting preparation.
 """
 import asyncio
-from langchain.agents import AgentExecutor, create_openai_tools_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
 from ..tools.meeting_tools import get_tech_trivia, get_fun_fact, get_trending_repos
@@ -11,6 +10,7 @@ from ..core.llm_gateway import LLMGateway
 from ..core.logging_config import get_logger
 from ..core.config import settings
 from ..formatters.meeting_notes_formatter import MeetingNotesFormatter
+from ..prompts.agent_prompts import MEETING_PLANNER_PROMPT
 
 logger = get_logger(__name__)
 
@@ -22,31 +22,11 @@ class MeetingPlannerAgent:
         self.llm_gateway = LLMGateway()
         self.tools = [get_tech_trivia, get_fun_fact, get_trending_repos]
         
-        # Create the agent prompt with better error handling instructions
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are a meeting preparation assistant. Your job is to:
-1. Gather engaging content for meetings (trivia, fun facts, trending tech)
-2. Format this content into professional meeting notes for the host
-3. Ensure the content is relevant and engaging for a tech audience
-
-IMPORTANT: The tools may sometimes fail or return fallback content. This is normal and expected.
-- If a tool fails, it will return fallback content that you should use
-- Always generate complete meeting notes even if some tools fail
-- Focus on creating engaging content that will help break the ice and keep participants engaged
-- Format the output as professional meeting notes with clear sections
-
-Use the available tools to gather information, then format everything into clear meeting notes.
-If any tool fails, use the fallback content provided and continue with the meeting preparation."""),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ])
-        
-        # Create the agent
-        self.agent = create_openai_tools_agent(
+        # Create the agent using centralized prompt - provider agnostic
+        self.agent = create_tool_calling_agent(
             llm=self.llm_gateway.chat_model,
             tools=self.tools,
-            prompt=prompt
+            prompt=MEETING_PLANNER_PROMPT
         )
         
         # Create the executor

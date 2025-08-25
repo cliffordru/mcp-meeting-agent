@@ -51,4 +51,8 @@ class Settings(BaseSettings):
     LANGFUSE_PUBLIC_KEY: Optional[str] = None
     LANGFUSE_HOST: Optional[str] = None
 
+    # FastMCP Configuration
+    MCP_MASK_ERROR_DETAILS: bool = True  # Hide internal errors from clients
+    MCP_ENABLE_LOGGING: bool = True      # Enable MCP client logging
+
 settings = Settings()

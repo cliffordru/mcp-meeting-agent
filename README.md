@@ -8,19 +8,31 @@ A meeting preparation agent that provides trivia, fun facts, and GitHub trending
 
 ## Features
 
-- **Tech Trivia**: Fetches technology trivia questions and answers from Open Trivia Database
-- **Fun Facts**: Provides interesting random facts from Useless Facts API
-- **GitHub Trending**: Shows current trending repositories from OSS Insight API
+- **Tech Trivia**: Fetches technology trivia questions and answers from external APIs
+- **Fun Facts**: Provides interesting random facts from external APIs
+- **GitHub Trending**: Shows current trending repositories from external APIs
 - **Meeting Notes**: Generates formatted meeting notes for hosts
 - **LangChain Agent Framework**: Modern LLM agent architecture with tool-based orchestration
 - **Intelligent Tool Coordination**: Agent automatically selects and uses appropriate tools
 - **Robust Error Handling**: Graceful fallbacks and comprehensive error recovery
 - **Structured Logging**: Comprehensive logging with configurable levels
 - **Comprehensive Testing**: Full test coverage for all components
+- **FastMCP Integration**: Production-ready MCP server with error masking, rate limiting, and context-aware logging
 
 ## Architecture
 
-The project follows a modern LangChain agent architecture with clean separation of concerns:
+The project follows a modern LangChain agent architecture with clean separation of concerns and **provider-agnostic LLM support**:
+
+### Provider-Agnostic Design
+
+The application is designed to work with multiple LLM providers without code changes:
+
+- **OpenAI/OpenRouter**: Use any OpenAI-compatible API via `base_url` configuration
+- **Anthropic Claude**: Direct support for Claude models (requires `langchain-anthropic`)
+- **Google Gemini**: Direct support for Gemini models (requires `langchain-google-genai`)
+- **Other Providers**: Any OpenAI-compatible API via `base_url` configuration
+
+The system automatically detects the provider based on the model name and configuration, making it easy to switch between providers by simply updating your `.env` file.
 
 - **LangChain Agents**: Intelligent orchestrators that coordinate tools using LLM reasoning
 - **Tools**: Reusable LangChain tools that wrap external services and APIs
@@ -50,6 +62,18 @@ The project follows a modern LangChain agent architecture with clean separation 
    ```bash
    uv sync
    ```
+   
+   **Optional**: Install additional LLM provider support:
+   ```bash
+   # For Anthropic Claude support
+   uv add langchain-anthropic
+   
+   # For Google Gemini support  
+   uv add langchain-google-genai
+   
+   # Or install all providers
+   uv add langchain-anthropic langchain-google-genai
+   ```
 
 3. **Set up environment variables**:
    ```bash
@@ -75,20 +99,29 @@ The project follows a modern LangChain agent architecture with clean separation 
 Key configuration options in `.env`:
 
 ```env
-# LLM Configuration
+# LLM Configuration (Provider Agnostic)
 LLM_API_KEY=your_api_key
-LLM_API_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
+LLM_API_BASE_URL=https://api.openai.com/v1  # Optional: for OpenAI/OpenRouter
+LLM_MODEL=gpt-4o-mini  # Supports OpenAI, Anthropic Claude, Google Gemini
 LLM_TEMPERATURE=0.0
-LLM_REQUEST_TIMEOUT=15
+LLM_REQUEST_TIMEOUT=60
+
+# Provider Examples:
+# OpenAI/OpenRouter: LLM_MODEL=gpt-4o-mini, LLM_API_BASE_URL=https://api.openai.com/v1
+# Anthropic Claude: LLM_MODEL=claude-3-5-sonnet-20241022 (no base_url needed)
+# Google Gemini: LLM_MODEL=gemini-1.5-flash (no base_url needed)
 
 # API Configuration
-TECH_TRIVIA_API_URL=https://opentdb.com/api.php?amount=1&category=18&type=multiple
-FUN_FACTS_API_URL=https://uselessfacts.jsph.pl/random.json?language=en
-GITHUB_TRENDING_URL=https://api.ossinsight.io/v1/trends/repos/
+TECH_TRIVIA_API_URL=your_tech_trivia_api_url
+FUN_FACTS_API_URL=your_fun_facts_api_url
+GITHUB_TRENDING_URL=your_github_trending_api_url
 
 # Logging
 LOG_LEVEL=INFO
+
+# FastMCP Configuration
+MCP_MASK_ERROR_DETAILS=true
+MCP_ENABLE_LOGGING=true
 ```
 
 ## Testing
@@ -117,14 +150,14 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### Security Considerations
 
-**Current State**: No security measures implemented
+**Current State**: Basic FastMCP error masking and rate limiting implemented
 **Production Needs**:
 - **Authentication**: OAuth 2.0 flow with proper session management
 - **Input Validation**: Content filtering and sanitization for all inputs
 - **Output Filtering**: LLM output validation to prevent prompt injection
 - **SAST/DAST**: Static and dynamic application security testing
 - **SCA**: Software composition analysis for dependency vulnerabilities
-- **Rate Limiting**: API rate limiting and abuse prevention
+- **Enhanced Rate Limiting**: More sophisticated rate limiting and abuse prevention
 - **Secrets Management**: TBD when needed
 
 ### Performance & Scalability
@@ -137,13 +170,14 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 
 ### AI Architecture Improvements
 
-**Current State**: LangChain agent framework with tool-based architecture and hardcoded fallback content for API failures
+**Current State**: LangChain agent framework with tool-based architecture, LLM-generated fallback content for API failures, and provider-agnostic LLM support
 **Production Needs**:
 - **Model-as-a-Service**: Right-sized models for cost/latency/accuracy balance
 - **Prompt Engineering**: Systematic prompt optimization and versioning
 - **Agent Optimization**: Fine-tune agent prompts and tool selection logic
+- **Multi-Provider Support**: Enhanced provider switching and fallback mechanisms
 - **Tool Validation**: Enhanced input/output validation for tools
-- **LLM-Generated Fallbacks**: Replace hardcoded fallback content with dynamic LLM-generated content when APIs fail
+- **Enhanced LLM-Generated Fallbacks**: Improve dynamic LLM-generated content when APIs fail
   - Generate contextual trivia questions based on meeting type/context
   - Create relevant fun facts tailored to the audience/industry
   - Provide trending tech topics specific to the team's domain
@@ -161,9 +195,11 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 - **Analytics**: Meeting effectiveness tracking and insights
 
 ### Monitoring & Alerting
-**Current State**: Basic structured logging
+**Current State**: Basic structured logging with FastMCP client logging integration
 **Production Needs**:
 - **Observability & Alerting**: Enhanced monitoring for agent performance and tool usage
+- **Centralized Logging**: Log aggregation and analysis
+- **Performance Metrics**: Response time tracking and alerting
 
 ## Project Structure
 
@@ -184,10 +220,11 @@ mcp-meeting-agent/
 │   │   │   ├── meeting_notes_formatter.py
 │   │   │   └── repository_formatter.py
 │   │   ├── prompts/
-│   │   │   └── meeting_prompts.py
+│   │   │   ├── __init__.py
+│   │   │   ├── agent_prompts.py
+│   │   │   └── fallback_prompts.py
 │   │   ├── schemas/
 │   │   │   ├── fun_facts.py
-│   │   │   ├── meeting_info.py
 │   │   │   └── tech_trivia.py
 │   │   ├── services/
 │   │   │   ├── fun_facts_service.py
@@ -200,10 +237,10 @@ mcp-meeting-agent/
 │       ├── test_github_trending_agent.py
 │       ├── test_github_trending_service.py
 │       ├── test_meeting_notes.py
-│       ├── test_meeting_prompts.py
 │       ├── test_meeting_planner_agent.py
 │       ├── test_meeting_tools.py
 │       ├── test_repository_formatter.py
+│       ├── test_server_integration.py
 │       └── test_tech_trivia_agent.py
 ├── server.py
 ├── env.example
@@ -216,7 +253,7 @@ mcp-meeting-agent/
 
 The MCP server exposes a single tool:
 
-- `prepare_meeting(meeting_info: str)`: Generates meeting preparation content including trivia, fun facts, and trending repositories using LangChain agent orchestration
+- `prepare_meeting(ctx: Context, meeting_context: str = "")`: Generates meeting preparation content including trivia, fun facts, and trending repositories using LangChain agent orchestration with enhanced error handling and context-aware logging
 
 ## Dependencies
 

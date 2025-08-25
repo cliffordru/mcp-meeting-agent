@@ -19,38 +19,34 @@ class TestGitHubTrendingService(unittest.TestCase):
         service = GitHubTrendingService()
         self.assertIsInstance(service, GitHubTrendingService)
         self.assertEqual(service.api_url, "https://api.ossinsight.io/v1/trends/repos/")
-        self.assertEqual(service.headers, {'Accept': 'application/json'})
+        self.assertEqual(service.timeout, 30)  # API_TIMEOUT from settings
 
     @patch('app.services.github_trending_service.aiohttp.ClientSession')
     def test_get_trending_repos_success(self, mock_session_class):
         """Test successful trending repositories retrieval."""
         async def run_test():
-            # Mock response data
+            # Mock response data - using the new API format
             mock_response_data = {
-                "type": "sql_endpoint",
-                "data": {
-                    "columns": [],
-                    "rows": [
-                        {
-                            "repo_name": "moeru-ai/airi",
-                            "description": "Self hosted AI companion",
-                            "primary_language": "Vue",
-                            "stars": "801"
-                        },
-                        {
-                            "repo_name": "plait-board/drawnix",
-                            "description": "Open source whiteboard tool",
-                            "primary_language": "TypeScript",
-                            "stars": "530"
-                        },
-                        {
-                            "repo_name": "printz-labs/copytrading-bot-solana",
-                            "description": "Copy trading bot for Solana",
-                            "primary_language": "TypeScript",
-                            "stars": "154"
-                        }
-                    ]
-                }
+                "data": [
+                    {
+                        "repo_name": "moeru-ai/airi",
+                        "description": "Self hosted AI companion",
+                        "language": "Vue",
+                        "stars": 801
+                    },
+                    {
+                        "repo_name": "plait-board/drawnix",
+                        "description": "Open source whiteboard tool",
+                        "language": "TypeScript",
+                        "stars": 530
+                    },
+                    {
+                        "repo_name": "printz-labs/copytrading-bot-solana",
+                        "description": "Copy trading bot for Solana",
+                        "language": "TypeScript",
+                        "stars": 154
+                    }
+                ]
             }
             
             # Mock response
@@ -77,7 +73,7 @@ class TestGitHubTrendingService(unittest.TestCase):
             self.assertEqual(result[0]['name'], "moeru-ai/airi")
             self.assertEqual(result[0]['description'], "Self hosted AI companion")
             self.assertEqual(result[0]['language'], "Vue")
-            self.assertEqual(result[0]['stars'], "801")
+            self.assertEqual(result[0]['stars'], 801)
             self.assertEqual(result[0]['url'], "https://github.com/moeru-ai/airi")
         
         asyncio.run(run_test())
@@ -99,77 +95,92 @@ class TestGitHubTrendingService(unittest.TestCase):
             
             mock_session_class.return_value = mock_session
 
-            with self.assertRaises(ValueError):
-                await self.service.get_trending_repos()
+            # Should return fallback repos instead of raising exception
+            result = await self.service.get_trending_repos()
+            self.assertIsInstance(result, list)
+            self.assertEqual(len(result), 3)  # Fallback repos
+            self.assertEqual(result[0]['name'], 'langchain-ai/langchain')
         
         asyncio.run(run_test())
 
-    def test_extract_trending_repos_with_valid_data(self):
-        """Test extracting trending repos from valid JSON data."""
-        data = {
-            "type": "sql_endpoint",
-            "data": {
-                "rows": [
-                    {
-                        "repo_name": "test/repo1",
-                        "description": "Test description 1",
-                        "primary_language": "Python",
-                        "stars": "100"
-                    },
-                    {
-                        "repo_name": "test/repo2",
-                        "description": "Test description 2",
-                        "primary_language": "JavaScript",
-                        "stars": "50"
-                    }
-                ]
-            }
-        }
-        
-        repos = self.service._extract_trending_repos(data)
-        self.assertIsInstance(repos, list)
-        self.assertEqual(len(repos), 2)
-        self.assertEqual(repos[0]['name'], "test/repo1")
-        self.assertEqual(repos[0]['description'], "Test description 1")
-        self.assertEqual(repos[0]['url'], "https://github.com/test/repo1")
+    @patch('app.services.github_trending_service.aiohttp.ClientSession')
+    def test_get_trending_repos_empty_response(self, mock_session_class):
+        """Test handling of empty API response."""
+        async def run_test():
+            # Mock empty response data
+            mock_response_data = {"data": []}
+            
+            # Mock response
+            mock_response = AsyncMock()
+            mock_response.json = AsyncMock(return_value=mock_response_data)
+            mock_response.raise_for_status = Mock()
+            
+            # Mock the session context manager
+            mock_session = AsyncMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session.get = Mock(return_value=mock_response)
+            
+            # Mock the response context manager
+            mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_response.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session_class.return_value = mock_session
 
-    def test_extract_trending_repos_with_empty_data(self):
-        """Test extracting trending repos from empty data."""
-        data = {"type": "sql_endpoint", "data": {"rows": []}}
-        
-        repos = self.service._extract_trending_repos(data)
-        self.assertIsInstance(repos, list)
-        self.assertEqual(len(repos), 0)
+            result = await self.service.get_trending_repos()
 
-    def test_extract_trending_repos_with_invalid_data(self):
-        """Test extracting trending repos from invalid data."""
-        data = {"invalid": "structure"}
+            # Should return fallback repos when no data
+            self.assertIsInstance(result, list)
+            self.assertEqual(len(result), 3)  # Fallback repos
+            self.assertEqual(result[0]['name'], 'langchain-ai/langchain')
         
-        repos = self.service._extract_trending_repos(data)
-        self.assertIsInstance(repos, list)
-        self.assertEqual(len(repos), 0)
+        asyncio.run(run_test())
 
-    def test_extract_trending_repos_limits_to_five(self):
-        """Test that extract_trending_repos limits results to 5 repos."""
-        data = {
-            "type": "sql_endpoint",
-            "data": {
-                "rows": [
-                    {
-                        "repo_name": f"test/repo{i}",
-                        "description": f"Description {i}",
-                        "primary_language": "Python",
-                        "stars": str(i * 10)
-                    } for i in range(10)
-                ]
-            }
-        }
+    @patch('app.services.github_trending_service.aiohttp.ClientSession')
+    def test_get_trending_repos_invalid_response(self, mock_session_class):
+        """Test handling of invalid API response format."""
+        async def run_test():
+            # Mock invalid response data
+            mock_response_data = {"invalid": "structure"}
+            
+            # Mock response
+            mock_response = AsyncMock()
+            mock_response.json = AsyncMock(return_value=mock_response_data)
+            mock_response.raise_for_status = Mock()
+            
+            # Mock the session context manager
+            mock_session = AsyncMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session.get = Mock(return_value=mock_response)
+            
+            # Mock the response context manager
+            mock_response.__aenter__ = AsyncMock(return_value=mock_response)
+            mock_response.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session_class.return_value = mock_session
+
+            result = await self.service.get_trending_repos()
+
+            # Should return fallback repos when data is invalid
+            self.assertIsInstance(result, list)
+            self.assertEqual(len(result), 3)  # Fallback repos
+            self.assertEqual(result[0]['name'], 'langchain-ai/langchain')
         
-        repos = self.service._extract_trending_repos(data)
-        self.assertIsInstance(repos, list)
-        self.assertEqual(len(repos), 5)
-        self.assertEqual(repos[0]['name'], "test/repo0")
-        self.assertEqual(repos[4]['name'], "test/repo4")
+        asyncio.run(run_test())
+
+    def test_get_fallback_repos(self):
+        """Test fallback repositories method."""
+        fallback_repos = self.service._get_fallback_repos()
+        
+        self.assertIsInstance(fallback_repos, list)
+        self.assertEqual(len(fallback_repos), 3)
+        
+        # Check first repo
+        self.assertEqual(fallback_repos[0]['name'], 'langchain-ai/langchain')
+        self.assertEqual(fallback_repos[0]['language'], 'Python')
+        self.assertEqual(fallback_repos[0]['stars'], 50000)
+        self.assertEqual(fallback_repos[0]['url'], 'https://github.com/langchain-ai/langchain')
 
 
 if __name__ == '__main__':
