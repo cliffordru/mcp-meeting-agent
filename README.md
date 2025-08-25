@@ -51,6 +51,11 @@ The project follows a clean architecture with separation of concerns:
    uv run server.py
    ```
 
+5. **Configure MCP Client**:
+   To use this MCP server with your MCP host client, see [`mcp-server-config.json`](mcp-server-config.json) in the project root for the complete configuration example.
+
+   The server runs on `http://127.0.0.1:8000/sse` by default and provides the `prepare_meeting()` tool for generating meeting content.
+
 ## Configuration
 
 Key configuration options in `.env`:
@@ -190,12 +195,6 @@ mcp-meeting-agent/
 The MCP server exposes a single tool:
 
 - `prepare_meeting(meeting_info: str)`: Generates meeting preparation content including trivia, fun facts, and trending repositories
-
-## MCP Client Configuration
-
-To use this MCP server with your MCP host client, see `mcp-server-config.json` in the project root for the complete configuration example for cursor.
-
-The server runs on `http://127.0.0.1:8000/sse` by default and provides the `prepare_meeting()` tool for generating meeting content.
 
 ## Dependencies
 
