@@ -154,7 +154,7 @@ uv run pytest src/tests/ --cov=src/app --cov-report=html
 **Production Needs**:
 - **Authentication**: OAuth 2.0 flow with proper session management
 - **Input Validation**: Content filtering and sanitization for all inputs
-- **Output Filtering**: LLM output validation to prevent prompt injection
+- **Output Filtering**: LLM output validation to prevent harms
 - **SAST/DAST**: Static and dynamic application security testing
 - **SCA**: Software composition analysis for dependency vulnerabilities
 - **Rate Limiting**: More sophisticated rate limiting and abuse prevention
